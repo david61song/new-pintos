@@ -1,0 +1,8 @@
+misc/
+.ccls_cache/
+.vscode/
+tags
+.cache/
+*.sh
+*.json
+
