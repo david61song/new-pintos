@@ -18,7 +18,7 @@ def resolve_kernel():
 
 def resolve_loc(addrs):
     out = subprocess.check_output(
-            ['addr2line', '-e', resolve_kernel(), '-f'] + addrs)
+            ['x86_64-elf-addr2line', '-e', resolve_kernel(), '-f'] + addrs)
     lines = out.decode('utf-8').split('\n')[:-1]
     for idx in range(0, len(lines), 2):
         fname = lines[idx]

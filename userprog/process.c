@@ -342,10 +342,10 @@ load (const char *file_name, struct intr_frame *if_) {
 	char *token;
 	char *save_ptr;
 	int args_num = 0;
+	int nums;
 	char* args[MAX_ARG_SIZE];
+	char* args_address[MAX_ARG_SIZE];
 	char* file_name_cpy;
-
-
 
 	for (token = strtok_r ((char *)file_name, " ", &save_ptr); token != NULL;
     token = strtok_r (NULL, " ", &save_ptr)){
@@ -450,9 +450,33 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* Start address. */
 	if_->rip = ehdr.e_entry;
+	/* Make Arguments stack --> Arguments Setting */
 
-	/* TODO: Your code goes here.
-	 * TODO: Implement argument passing (see project2/argument_passing.html). */
+
+	nums = args_num - 1;
+
+	while (nums >= 0){
+		memcpy((void *) if_ -> rsp, args[nums], strlen(args[nums]) + 1);
+		args_address[nums] = (char *)if_ -> rsp;
+		if_ -> rsp -= strlen(args[nums]) + 1;
+		nums --;
+	}
+
+	/* Word - align */
+	if_ -> rsp -= (if_ -> rsp) & 0x7;
+
+	nums = args_num - 1;
+
+	while (nums >= 0){
+		memcpy((void *)if_ -> rsp, &args_address[nums], sizeof(uint64_t));
+		nums --;
+		if_ -> rsp -= 8;
+	}
+
+	/* fake return address */
+	strlcpy((void *)if_ -> rsp, 0, sizeof(uint64_t));
+
+	hex_dump(0, (void *) if_ -> rsp, 180, true);
 
 	success = true;
 
