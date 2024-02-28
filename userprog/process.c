@@ -343,6 +343,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	char *save_ptr;
 	int args_num = 0;
 	int nums;
+	int args_size;
 	char* args[MAX_ARG_SIZE];
 	char* args_address[MAX_ARG_SIZE];
 	char* file_name_cpy;
@@ -450,33 +451,47 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* Start address. */
 	if_->rip = ehdr.e_entry;
+
+	/* Example:
+	*	args-many a b c d e
+	*	args_num = 6
+	*	args[args_num] --> [*args-many][*a][*b][*c][*d][*e][NULL]
+	*/
+
 	/* Make Arguments stack --> Arguments Setting */
-
-
 	nums = args_num - 1;
 
 	while (nums >= 0){
-		memcpy((void *) if_ -> rsp, args[nums], strlen(args[nums]) + 1);
+		args_size = strlen(args[nums]) + 1;
+		if_ -> rsp -= args_size;
+		memcpy((void *) if_ -> rsp, args[nums], args_size);
 		args_address[nums] = (char *)if_ -> rsp;
-		if_ -> rsp -= strlen(args[nums]) + 1;
 		nums --;
 	}
 
 	/* Word - align */
-	if_ -> rsp -= (if_ -> rsp) & 0x7;
+
+	if_ -> rsp -= if_ -> rsp % 8;
 
 	nums = args_num - 1;
 
+	if_ -> rsp -= 8;
+	*(uint64_t *)(if_->rsp) = (uint64_t) 0;
+
+
 	while (nums >= 0){
-		memcpy((void *)if_ -> rsp, &args_address[nums], sizeof(uint64_t));
-		nums --;
 		if_ -> rsp -= 8;
+		*(uint64_t *)(if_->rsp) = (uint64_t) args_address[nums];
+		nums --;
 	}
-
 	/* fake return address */
-	strlcpy((void *)if_ -> rsp, 0, sizeof(uint64_t));
+	if_ -> rsp -= 8;
+	*(uint64_t *)if_ -> rsp = 0;
 
-	hex_dump(0, (void *) if_ -> rsp, 180, true);
+	/* For debugging purpose */
+
+	if_->R.rdi  = args_num;
+	if_->R.rsi = if_-> rsp + 8;
 
 	success = true;
 
