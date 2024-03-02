@@ -208,13 +208,9 @@ process_exec (void *f_name) {
  * does nothing. */
 int
 process_wait (tid_t child_tid UNUSED) {
-	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
-	 * XXX:       to add infinite loop here before
-	 * XXX:       implementing the process_wait. */
+
 	 /* auxilary implement*/
-	 while (1){
-		// do nothing..
-	 }
+	timer_sleep(300);
 	return -1;
 }
 
@@ -489,7 +485,9 @@ load (const char *file_name, struct intr_frame *if_) {
 	*(uint64_t *)if_ -> rsp = 0;
 
 	/* For debugging purpose */
+	//hex_dump(if_ -> rsp, (void *) if_ -> rsp, 80, true);
 
+	/* argc and argv*/
 	if_->R.rdi  = args_num;
 	if_->R.rsi = if_-> rsp + 8;
 
