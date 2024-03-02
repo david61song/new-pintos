@@ -39,8 +39,20 @@ syscall_init (void) {
 
 /* The main system call interface */
 void
-syscall_handler (struct intr_frame *f UNUSED) {
-	// TODO: Your implementation goes here.
-	printf ("system call!\n");
+syscall_handler (struct intr_frame *f) {
+	int syscall_num;
+	syscall_num = f -> R.rax;
+
+	switch (syscall_num){
+	    case SYS_OPEN:
+			printf("Aux");
+			break;
+
+		default :
+			printf("default!!");
+			printf("NUM IS %d! \n", syscall_num);
+			break;
+	}
+
 	thread_exit ();
 }
