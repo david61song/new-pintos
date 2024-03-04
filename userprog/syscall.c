@@ -1,6 +1,8 @@
 #include "userprog/syscall.h"
 #include <stdio.h>
 #include <syscall-nr.h>
+#include "include/lib/syscall-nr.h"
+#include "threads/init.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/loader.h"
@@ -10,6 +12,7 @@
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
+void halt();
 
 /* System call.
  *
@@ -24,6 +27,11 @@ void syscall_handler (struct intr_frame *);
 #define MSR_LSTAR 0xc0000082        /* Long mode SYSCALL target */
 #define MSR_SYSCALL_MASK 0xc0000084 /* Mask for the eflags */
 
+void halt(){
+	power_off();
+}
+
+
 void
 syscall_init (void) {
 	write_msr(MSR_STAR, ((uint64_t)SEL_UCSEG - 0x10) << 48  |
@@ -37,6 +45,8 @@ syscall_init (void) {
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
 }
 
+
+
 /* The main system call interface */
 void
 syscall_handler (struct intr_frame *f) {
@@ -44,14 +54,42 @@ syscall_handler (struct intr_frame *f) {
 	syscall_num = f -> R.rax;
 
 	switch (syscall_num){
+	    case SYS_HALT:
+		halt();
+		printf("HALT!!!");
+		break;
+	    case SYS_EXIT:
+		break;
+	    case SYS_FORK:
+		break;
+	    case SYS_EXEC:
+		break;
+	    case SYS_WAIT:
+		break;
+	    case SYS_CREATE:
+		break;
+	    case SYS_REMOVE:
+		break;
 	    case SYS_OPEN:
-			printf("Aux");
-			break;
+		break;
+	    case SYS_FILESIZE:
+		break;
+	    case SYS_READ:
+		break;
+	    case SYS_WRITE:
+		break;
+	    case SYS_SEEK:
+		break;
+	    case SYS_TELL:
+		break;
+	    case SYS_CLOSE:
+		break;
 
-		default :
-			printf("default!!");
-			printf("NUM IS %d! \n", syscall_num);
-			break;
+
+	    default :
+		    printf("default!!");
+		    printf("NUM IS %d! \n", syscall_num);
+		    break;
 	}
 
 	thread_exit ();

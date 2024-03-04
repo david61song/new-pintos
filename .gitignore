@@ -5,4 +5,5 @@ tags
 .cache/
 *.sh
 *.json
+.DS_Store
 
