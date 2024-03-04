@@ -210,7 +210,12 @@ int
 process_wait (tid_t child_tid UNUSED) {
 
 	 /* auxilary implement*/
-	timer_sleep(300);
+
+	while(1){
+		//do nothing!
+	}
+
+
 	return -1;
 }
 
