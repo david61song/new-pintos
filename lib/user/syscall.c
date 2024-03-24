@@ -2,32 +2,46 @@
 #include <stdint.h>
 #include "../syscall-nr.h"
 
+// Declares a function named `syscall` that is always inlined, with the `static` keyword indicating internal linkage (only visible within the defining source file).
 __attribute__((always_inline))
-static __inline int64_t syscall (uint64_t num_, uint64_t a1_, uint64_t a2_,
-		uint64_t a3_, uint64_t a4_, uint64_t a5_, uint64_t a6_) {
-	int64_t ret;
-	register uint64_t *num asm ("rax") = (uint64_t *) num_;
-	register uint64_t *a1 asm ("rdi") = (uint64_t *) a1_;
-	register uint64_t *a2 asm ("rsi") = (uint64_t *) a2_;
-	register uint64_t *a3 asm ("rdx") = (uint64_t *) a3_;
-	register uint64_t *a4 asm ("r10") = (uint64_t *) a4_;
-	register uint64_t *a5 asm ("r8") = (uint64_t *) a5_;
-	register uint64_t *a6 asm ("r9") = (uint64_t *) a6_;
+static __inline int64_t syscall (
+    uint64_t num_, // First parameter: The system call number.
+    uint64_t a1_,  // Second parameter: The first argument for the system call.
+    uint64_t a2_,  // Third parameter: The second argument for the system call.
+    uint64_t a3_,  // Fourth parameter: The third argument for the system call.
+    uint64_t a4_,  // Fifth parameter: The fourth argument for the system call.
+    uint64_t a5_,  // Sixth parameter: The fifth argument for the system call.
+    uint64_t a6_   // Seventh parameter: The sixth argument for the system call.
+) {
+    int64_t ret; // Variable to store the system call return value.
 
-	__asm __volatile(
-			"mov %1, %%rax\n"
-			"mov %2, %%rdi\n"
-			"mov %3, %%rsi\n"
-			"mov %4, %%rdx\n"
-			"mov %5, %%r10\n"
-			"mov %6, %%r8\n"
-			"mov %7, %%r9\n"
-			"syscall\n"
-			: "=a" (ret)
-			: "g" (num), "g" (a1), "g" (a2), "g" (a3), "g" (a4), "g" (a5), "g" (a6)
-			: "cc", "memory");
-	return ret;
+    // Declare register variables mapped to specific registers to pass system call arguments.
+    register uint64_t *num asm ("rax") = (uint64_t *) num_;
+    register uint64_t *a1 asm ("rdi") = (uint64_t *) a1_;
+    register uint64_t *a2 asm ("rsi") = (uint64_t *) a2_;
+    register uint64_t *a3 asm ("rdx") = (uint64_t *) a3_;
+    register uint64_t *a4 asm ("r10") = (uint64_t *) a4_;
+    register uint64_t *a5 asm ("r8") = (uint64_t *) a5_;
+    register uint64_t *a6 asm ("r9") = (uint64_t *) a6_;
+
+    // Inline assembly block to perform the system call.
+    __asm __volatile(
+        "mov %1, %%rax\n" // Move the system call number into RAX register.
+        "mov %2, %%rdi\n" // Move the first argument into RDI register.
+        "mov %3, %%rsi\n" // Move the second argument into RSI register.
+        "mov %4, %%rdx\n" // Move the third argument into RDX register.
+        "mov %5, %%r10\n" // Move the fourth argument into R10 register.
+        "mov %6, %%r8\n"  // Move the fifth argument into R8 register.
+        "mov %7, %%r9\n"  // Move the sixth argument into R9 register.
+        "syscall\n"       // Execute the system call.
+
+        : "=a" (ret) // Output operand: Store the return value in 'ret'.
+        : "g" (num), "g" (a1), "g" (a2), "g" (a3), "g" (a4), "g" (a5), "g" (a6) // Input operands: System call number and arguments.
+        : "cc", "memory" // Clobbered registers: Condition codes and memory, indicating they may be altered by the assembly code.
+    );
+    return ret; // Return the system call result.
 }
+
 
 /* Invokes syscall NUMBER, passing no arguments, and returns the
    return value as an `int'. */

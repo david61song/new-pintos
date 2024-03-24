@@ -12,7 +12,6 @@
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
-void halt();
 
 /* System call.
  *
@@ -27,8 +26,17 @@ void halt();
 #define MSR_LSTAR 0xc0000082        /* Long mode SYSCALL target */
 #define MSR_SYSCALL_MASK 0xc0000084 /* Mask for the eflags */
 
-void halt(){
+
+/* System Call function implementation */
+
+void
+halt(void){
 	power_off();
+}
+
+size_t
+write(int fildes, const void *buf, size_t nbyte){
+	return -1;
 }
 
 
@@ -50,45 +58,42 @@ syscall_init (void) {
 /* The main system call interface */
 void
 syscall_handler (struct intr_frame *f) {
-	int syscall_num;
+	uint64_t syscall_num;
 	syscall_num = f -> R.rax;
 
 	switch (syscall_num){
 	    case SYS_HALT:
-		halt();
-		printf("HALT!!!");
-		break;
+			halt();
+			break;
 	    case SYS_EXIT:
-		break;
+			break;
 	    case SYS_FORK:
-		break;
+			break;
 	    case SYS_EXEC:
-		break;
+			break;
 	    case SYS_WAIT:
-		break;
+			break;
 	    case SYS_CREATE:
-		break;
+			break;
 	    case SYS_REMOVE:
-		break;
+			break;
 	    case SYS_OPEN:
-		break;
+			break;
 	    case SYS_FILESIZE:
-		break;
+			break;
 	    case SYS_READ:
-		break;
+			break;
 	    case SYS_WRITE:
-		break;
+			break;
 	    case SYS_SEEK:
-		break;
+			break;
 	    case SYS_TELL:
-		break;
+			break;
 	    case SYS_CLOSE:
-		break;
-
+			break;
 
 	    default :
-		    printf("default!!");
-		    printf("NUM IS %d! \n", syscall_num);
+			halt();
 		    break;
 	}
 

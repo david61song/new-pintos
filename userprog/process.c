@@ -211,10 +211,10 @@ process_wait (tid_t child_tid UNUSED) {
 
 	 /* auxilary implement*/
 
-	while(1){
-		//do nothing!
-	}
 
+		printf("Aux implement : only waits 600 tick.\n");
+		timer_sleep(600);
+		printf("Exit!");
 
 	return -1;
 }
