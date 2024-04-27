@@ -9,7 +9,7 @@ ifeq ($(ARCH),arm64)
   AR = x86_64-elf-ar
   RANLIB = x86_64-elf-ranlib
 
-else ifeq ($(ARCH),X86_64)
+else ifeq ($(ARCH),x86_64)
   # For x86_64, remove the prefix
   AR = ar
   RANLIB = ranlib
