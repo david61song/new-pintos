@@ -1,6 +1,22 @@
 # -*- makefile -*-
 include ../Make.vars
 
+# Check the current system architecture
+ARCH := $(shell uname -m)
+
+ifeq ($(ARCH),arm64)
+  # For arm64, use the specified tools
+  AR = x86_64-elf-ar
+  RANLIB = x86_64-elf-ranlib
+
+else ifeq ($(ARCH),X86_64)
+  # For x86_64, remove the prefix
+  AR = ar
+  RANLIB = ranlib
+else
+  $(error Unsupported architecture: $(ARCH))
+endif
+
 $(PROGS): CPPFLAGS += -I$(SRCDIR)/include/lib/user -I.
 $(PROGS): CFLAGS += $(TDEFINE) -fno-stack-protector -Wno-builtin-declaration-mismatch
 
@@ -41,8 +57,8 @@ $(foreach prog,$(PROGS),$(eval $(call TEMPLATE,$(prog))))
 
 libc.a: $(LIB_OBJ)
 	rm -f $@
-	x86_64-elf-ar r $@ $^
-	x86_64-elf-ranlib $@
+	$(AR) r $@ $^
+	$(RANLIB) $@
 
 clean::
 	rm -f $(PROGS) $(PROGS_OBJ) $(PROGS_DEP)
