@@ -4,7 +4,7 @@ include ../Make.vars
 # Check the current system architecture
 ARCH := $(shell uname -m)
 
-ifeq ($(ARCH),arm64)
+ifeq ($(ARCH),aarch64)
   # For arm64, use the specified tools
   AR = x86_64-elf-ar
   RANLIB = x86_64-elf-ranlib
