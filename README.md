@@ -3,6 +3,7 @@ The manual is available at https://casys-kaist.github.io/pintos-kaist/
 
 
 # Contributor
+    EeeUnS (@eeeuns)
     david61song (@david61song)
 
 # Current - Grade
