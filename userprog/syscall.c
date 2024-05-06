@@ -30,13 +30,23 @@ void syscall_handler (struct intr_frame *);
 /* System Call function implementation */
 
 void
-halt(void){
+sys_exit(int status){
+	struct thread *curr = thread_current();
+	curr -> exit_code = status;
+	thread_exit();
+}
+
+void
+sys_halt(void){
 	power_off();
 }
 
 size_t
-write(int fildes, const void *buf, size_t nbyte){
-	return -1;
+sys_write(int fildes, const void *buf, size_t nbyte){
+	if (fildes == 1)
+		printf("%s", (char *)buf);
+	
+	return sizeof(buf);
 }
 
 
@@ -63,9 +73,10 @@ syscall_handler (struct intr_frame *f) {
 
 	switch (syscall_num){
 	    case SYS_HALT:
-			halt();
+			sys_halt();
 			break;
 	    case SYS_EXIT:
+			sys_exit(f->R.rdi);
 			break;
 	    case SYS_FORK:
 			break;
@@ -84,6 +95,7 @@ syscall_handler (struct intr_frame *f) {
 	    case SYS_READ:
 			break;
 	    case SYS_WRITE:
+			f->R.rax = sys_write(f->R.rdi, (void *)f->R.rsi, f->R.rdx);
 			break;
 	    case SYS_SEEK:
 			break;
@@ -93,9 +105,8 @@ syscall_handler (struct intr_frame *f) {
 			break;
 
 	    default :
-			halt();
+			sys_halt();
 		    break;
 	}
 
-	thread_exit ();
 }

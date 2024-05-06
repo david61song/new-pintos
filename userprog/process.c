@@ -20,7 +20,7 @@
 #include "intrinsic.h"
 #include "devices/timer.h"
 
-#define MAX_ARG_SIZE 15
+#define MAX_ARG_SIZE 64 
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -210,11 +210,7 @@ int
 process_wait (tid_t child_tid UNUSED) {
 
 	 /* auxilary implement*/
-
-
-		printf("Aux implement : only waits 600 tick.\n");
-		timer_sleep(600);
-		printf("Exit!");
+	timer_sleep(100);
 
 	return -1;
 }
@@ -223,11 +219,7 @@ process_wait (tid_t child_tid UNUSED) {
 void
 process_exit (void) {
 	struct thread *curr = thread_current ();
-	/* TODO: Your code goes here.
-	 * TODO: Implement process termination message (see
-	 * TODO: project2/process_termination.html).
-	 * TODO: We recommend you to implement process resource cleanup here. */
-
+	printf ("%s: exit(%d)\n", curr->name, curr->exit_code);
 	process_cleanup ();
 }
 
@@ -490,7 +482,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	*(uint64_t *)if_ -> rsp = 0;
 
 	/* For debugging purpose */
-	//hex_dump(if_ -> rsp, (void *) if_ -> rsp, 80, true);
+	/*hex_dump(if_ -> rsp, (void *) if_ -> rsp, USER_STACK - (if_ -> rsp) , true);*/
 
 	/* argc and argv*/
 	if_->R.rdi  = args_num;

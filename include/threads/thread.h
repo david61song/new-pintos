@@ -98,6 +98,7 @@ struct thread {
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
+	int exit_code;						/* Process exit code.*/
 	uint64_t *pml4;                     /* Page map level 4 */
 #endif
 #ifdef VM
