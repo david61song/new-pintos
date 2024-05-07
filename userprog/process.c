@@ -464,10 +464,9 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* Word - align */
 
-	if_ -> rsp -= if_ -> rsp % 8;
+	if_ -> rsp &= ~(7ULL);
 
 	nums = args_num - 1;
-
 	if_ -> rsp -= 8;
 	*(uint64_t *)(if_->rsp) = (uint64_t) 0;
 

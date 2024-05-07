@@ -3,6 +3,8 @@ use warnings;
 use tests::Algorithm::Diff;
 use File::Temp 'tempfile';
 use Fcntl qw(SEEK_SET SEEK_CUR);
+use Term::ANSIColor;
+
 
 sub fail;
 sub pass;
@@ -565,35 +567,34 @@ sub read_tar {
 
 # Utilities.
 
+# Utilities.
+
+
 sub fail {
-    finish ("FAIL", @_);
+    finish("FAIL", @_);
 }
 
 sub pass {
-    finish ("PASS", @_);
+    finish("PASS", @_);
 }
 
 sub finish {
     my ($verdict, @messages) = @_;
-
-    seek ($msg_file, 0, 0);
-    push (@messages, <$msg_file>);
-    close ($msg_file);
-    chomp (@messages);
-
+    seek($msg_file, 0, 0);
+    push(@messages, <$msg_file>);
+    close($msg_file);
+    chomp(@messages);
     my ($result_fn) = "$test.result";
-    open (RESULT, '>', $result_fn) or die "$result_fn: create: $!\n";
+    open(RESULT, '>', $result_fn) or die "$result_fn: create: $!\n";
     print RESULT "$verdict\n";
     print RESULT "$_\n" foreach @messages;
-    close (RESULT);
-
+    close(RESULT);
     if ($verdict eq 'PASS') {
-	print STDOUT "pass $test\n";
+        print STDOUT color('green') . "PASS $test\n" . color('reset');
     } else {
-	print STDOUT "FAIL $test\n";
+        print STDOUT color('red') . "FAIL $test\n" . color('reset');
     }
     print STDOUT "$_\n" foreach @messages;
-
     exit 0;
 }
 
