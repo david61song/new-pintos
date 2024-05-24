@@ -1,0 +1,24 @@
+################
+# <type>: <title> in the format below
+# Title must be within 50 characters / Clearly state what has changed / No period at the end
+# Example: feat: Add login feature
+
+# Do not erase the blank line below (for separation of title and body)
+
+################
+# Write the body (detailed content) below
+# When writing multiple lines of messages, separate them with "-" (each line within 72 characters)
+
+################
+# Write the footer below (add related issue number to the current commit)
+# Example: Close #7
+
+################
+# feat: new feature addition
+# fix: bug fix
+# docs: document update
+# test: add test code
+# refact: code refactoring
+# style: changes that do not affect the meaning of the code
+# chore: build or package manager updates
+################

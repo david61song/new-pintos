@@ -282,6 +282,15 @@ thread_name (void) {
 	return thread_current ()->name;
 }
 
+/* Changes the name of the current thread. */
+
+void 
+change_thread_name(const char *new_name){
+    strlcpy(thread_current() -> name, new_name, sizeof(thread_current() -> name));
+}
+
+	    
+
 /* Returns the running thread.
    This is running_thread() plus a couple of sanity checks.
    See the big comment at the top of thread.h for details. */

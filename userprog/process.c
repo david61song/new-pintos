@@ -341,8 +341,9 @@ load (const char *file_name, struct intr_frame *if_) {
 	char* args_address[MAX_ARG_SIZE];
 	char* file_name_cpy;
 
+
 	for (token = strtok_r ((char *)file_name, " ", &save_ptr); token != NULL;
-    token = strtok_r (NULL, " ", &save_ptr)){
+	     token = strtok_r (NULL, " ", &save_ptr)){
 		if (args_num >= MAX_ARG_SIZE){
 			success = false;
 			goto done;
@@ -364,6 +365,7 @@ load (const char *file_name, struct intr_frame *if_) {
 	t->pml4 = pml4_create ();
 	if (t->pml4 == NULL)
 		goto done;
+	change_thread_name(file_name_cpy);
 	process_activate (thread_current ());
 
 	/* Open executable file. */

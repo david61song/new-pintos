@@ -133,6 +133,7 @@ void thread_unblock (struct thread *);
 struct thread *thread_current (void);
 tid_t thread_tid (void);
 const char *thread_name (void);
+void change_thread_name(const char *);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
