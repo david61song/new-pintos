@@ -9,9 +9,39 @@
 #include "userprog/gdt.h"
 #include "threads/flags.h"
 #include "intrinsic.h"
+#include "filesys/filesys.h"
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
+
+/* Reads a byte at user virtual address UADDR.
+ * UADDR must be below KERN_BASE.
+ * Returns the byte value if successful, -1 if a segfault
+ * occurred. */
+static int64_t
+get_user (const uint8_t *uaddr) {
+    int64_t result;
+    __asm __volatile (
+    "movabsq $done_get, %0\n"
+    "movzbq %1, %0\n"
+    "done_get:\n"
+    : "=&a" (result) : "m" (*uaddr));
+    return result;
+}
+
+/* Writes BYTE to user address UDST.
+ * UDST must be below KERN_BASE.
+ * Returns true if successful, false if a segfault occurred. */
+static bool
+put_user (uint8_t *udst, uint8_t byte) {
+    int64_t error_code;
+    __asm __volatile (
+    "movabsq $done_put, %0\n"
+    "movb %b2, %1\n"
+    "done_put:\n"
+    : "=&a" (error_code), "=m" (*udst) : "q" (byte));
+    return error_code != -1;
+}
 
 /* System call.
  *
@@ -63,6 +93,36 @@ syscall_init (void) {
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
 }
 
+int
+sys_open(const char* path){	
+	/* check if path is not NULL */
+	if (path == NULL){
+	    return -1;
+	}
+
+	/* check if path pointer is below KERN_BASE */
+	if (is_user_vaddr(path) == 0){
+	    return -1;
+	}
+
+	struct thread *curr = thread_current();
+	struct file *file_p = filesys_open(path);
+
+
+	/* check if path pointer is valid */
+	if (get_user((const uint8_t *)path) == -1){
+	    return -1;
+	}
+
+	/* check if file does not exists in our file system */
+	if (file_p == NULL){
+	    return -1;
+	}
+	curr->filedes_table[curr->filedes_top] = file_p;
+	curr->filedes_top ++;
+
+	return (curr->filedes_top) - 1;
+}
 
 
 /* The main system call interface */
@@ -89,7 +149,7 @@ syscall_handler (struct intr_frame *f) {
 	    case SYS_REMOVE:
 			break;
 	    case SYS_OPEN:
-			break;
+			f->R.rax = sys_open((const char *)f->R.rdi);
 	    case SYS_FILESIZE:
 			break;
 	    case SYS_READ:

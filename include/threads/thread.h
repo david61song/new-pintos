@@ -28,6 +28,9 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
+
+#define MAX_FILEDES_ENTRY 10
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -89,7 +92,7 @@ struct thread {
 	/* Owned by thread.c. */
 	tid_t tid;                          /* Thread identifier. */
 	enum thread_status status;          /* Thread state. */
-	int wakeup_this_tick;                /* Tick to wake up.*/
+	int wakeup_this_tick;               /* Tick to wake up.*/
 	char name[16];                      /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
 
@@ -98,8 +101,10 @@ struct thread {
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
-	int exit_code;						/* Process exit code.*/
-	uint64_t *pml4;                     /* Page map level 4 */
+	int exit_code;					/* Process exit code.*/
+	struct file* filedes_table[MAX_FILEDES_ENTRY];  /* file descriptor table */
+	int filedes_top;				/* file descriptor top */
+	uint64_t *pml4;                     		/* Page map level 4 */
 #endif
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */

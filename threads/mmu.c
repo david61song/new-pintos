@@ -64,7 +64,8 @@ pdpe_walk (uint64_t *pdpe, const uint64_t va, int create) {
 /* Returns the address of the page table entry for virtual address va in page map level 4 (PML4).
  * If the PML4 entry does not have a page table for va and create is true, a new page table is created and a pointer is returned.
  * Otherwise, a null pointer is returned.
- */
+*/
+
 uint64_t *
 pml4e_walk (uint64_t *pml4e, const uint64_t va, int create) {
 	uint64_t *pte = NULL;                                                    // Initialize page table entry pointer as NULL
@@ -95,6 +96,7 @@ pml4e_walk (uint64_t *pml4e, const uint64_t va, int create) {
 /* Creates and returns a new page map level 4 (PML4) with mappings for kernel virtual addresses,
  * but none for user virtual addresses. Returns the new page directory, or a null pointer if memory allocation fails.
  */
+
 uint64_t *
 pml4_create (void) {
 	uint64_t *pml4 = palloc_get_page (0);                                    // Allocate a new page for PML4 without zeroing
@@ -106,6 +108,7 @@ pml4_create (void) {
 /* Applies the function func to each available page table entry within a page table.
  * Traverses using indices associated with the PT, applying provided aux data.
  */
+
 static bool
 pt_for_each (uint64_t *pt, pte_for_each_func *func, void *aux,
 		unsigned pml4_index, unsigned pdp_index, unsigned pdx_index) {
@@ -126,6 +129,7 @@ pt_for_each (uint64_t *pt, pte_for_each_func *func, void *aux,
 /* Applies the function func to each available page table entry within a page directory.
  * Traverses using indices associated with the PD, applying provided auxiliary data.
  */
+
 static bool
 pgdir_for_each (uint64_t *pdp, pte_for_each_func *func, void *aux,
 		unsigned pml4_index, unsigned pdp_index) {
@@ -142,6 +146,7 @@ pgdir_for_each (uint64_t *pdp, pte_for_each_func *func, void *aux,
 /* Applies the function func to each available page table entry within a page directory pointer table.
  * Traverses using indices associated with the PDP, applying provided auxiliary data.
  */
+
 static bool
 pdp_for_each (uint64_t *pdp,
 		pte_for_each_func *func, void *aux, unsigned pml4_index) {
@@ -156,6 +161,7 @@ pdp_for_each (uint64_t *pdp,
 }
 
 /* Apply function func to each available page table entry, including kernel's. */
+
 bool
 pml4_for_each (uint64_t *pml4, pte_for_each_func *func, void *aux) {
 	for (unsigned i = 0; i < PGSIZE / sizeof(uint64_t *); i++) {             // Iterate through all entries in the PML4

@@ -210,7 +210,7 @@ int
 process_wait (tid_t child_tid UNUSED) {
 
 	 /* auxilary implement*/
-	timer_sleep(100);
+	timer_sleep(300);
 
 	return -1;
 }
@@ -365,7 +365,13 @@ load (const char *file_name, struct intr_frame *if_) {
 	t->pml4 = pml4_create ();
 	if (t->pml4 == NULL)
 		goto done;
+
+	/* change current thread name to appropriate name */
 	change_thread_name(file_name_cpy);
+
+	/* initializtion of file descriptor */
+	t->filedes_top = 3;
+
 	process_activate (thread_current ());
 
 	/* Open executable file. */

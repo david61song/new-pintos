@@ -235,6 +235,7 @@ thread_create (const char *name, int priority,
 	t->tf.cs = SEL_KCSEG;
 	t->tf.eflags = FLAG_IF;
 
+
 	/* Add to run queue. */
 	thread_unblock (t);
 
@@ -466,7 +467,7 @@ next_thread_to_run (void) {
 
 /* Use iretq to launch the thread */
 void do_iret(struct intr_frame *tf) {
-		/* Function to safely return from an interrupt or system call using inline assembly. */
+	/* Function to safely return from an interrupt or system call using inline assembly. */
     __asm __volatile(
         /* Move the address contained in tf (pointer to struct intr_frame) into the stack pointer (rsp).
            This sets up the stack to point to the interrupt frame structure. */
