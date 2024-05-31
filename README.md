@@ -57,12 +57,12 @@ FAIL tests/userprog/create-long
 FAIL tests/userprog/create-exists
 pass tests/userprog/create-bound
 pass tests/userprog/open-normal
-FAIL tests/userprog/open-missing
+pass tests/userprog/open-missing
 pass tests/userprog/open-boundary
-FAIL tests/userprog/open-empty
+pass tests/userprog/open-empty
 pass tests/userprog/open-null
 FAIL tests/userprog/open-bad-ptr
-FAIL tests/userprog/open-twice
+pass tests/userprog/open-twice
 pass tests/userprog/close-normal
 pass tests/userprog/close-twice
 pass tests/userprog/close-bad-fd
