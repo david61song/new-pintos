@@ -18,14 +18,17 @@ void syscall_handler (struct intr_frame *);
  * UADDR must be below KERN_BASE.
  * Returns the byte value if successful, -1 if a segfault
  * occurred. */
-static int64_t
-get_user (const uint8_t *uaddr) {
+static int64_t get_user(const uint8_t *uaddr) {
     int64_t result;
+    // Inline assembly to attempt reading a byte from user space memory at address uaddr.
     __asm __volatile (
-    "movabsq $done_get, %0\n"
-    "movzbq %1, %0\n"
-    "done_get:\n"
-    : "=&a" (result) : "m" (*uaddr));
+        "movabsq $done_get, %0\n"  // Move the address of the label 'done_get' into result.
+        "movzbq %1, %0\n"          // Attempt to move the byte at address uaddr to result, zero-extending it to 64 bits.
+        "done_get:\n"              // Label indicating the end of the memory access attempt.
+        : "=&a" (result)           // Output operand: 'result' will be stored in the 'a' register. (RAX register)
+        : "m" (*uaddr)             // Input operand: the memory address to read from.
+    );
+
     return result;
 }
 
@@ -95,24 +98,24 @@ syscall_init (void) {
 
 int
 sys_open(const char* path){	
+	struct thread *curr;
+	struct file *file_p;
+
 	/* check if path is not NULL */
 	if (path == NULL){
 	    return -1;
 	}
-
 	/* check if path pointer is below KERN_BASE */
 	if (is_user_vaddr(path) == 0){
 	    return -1;
 	}
-
-	struct thread *curr = thread_current();
-	struct file *file_p = filesys_open(path);
-
-
 	/* check if path pointer is valid */
 	if (get_user((const uint8_t *)path) == -1){
-	    return -1;
+	    sys_exit(-1);
 	}
+	/* We are now safe to deference pointer provided by user process */
+	curr = thread_current();
+	file_p = filesys_open(path);
 
 	/* check if file does not exists in our file system */
 	if (file_p == NULL){

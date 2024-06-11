@@ -142,8 +142,9 @@ page_fault (struct intr_frame *f) {
 
 
 	if (not_present){
-	    f->R.rax = -1;
-	    do_iret(f);
+	    f->rip = f->R.rax; // next instruction point to rax (which contains the address of $done_get)
+		f->R.rax = -1; // return value
+		do_iret(f); // return to $done_get label
 	}
 
 

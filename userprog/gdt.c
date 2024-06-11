@@ -21,6 +21,40 @@
  * exactly what they sound like.  The TSS is used primarily for
  * stack switching on interrupts. */
 
+
+ /*
+ * A descriptor is a data structure that stores information about a memory region, 
+ * and there are various types of descriptors. Among them, the descriptor that 
+ * represents information about a segment is called a segment descriptor. 
+ * A segment descriptor includes information such as the segment's start address, 
+ * size, privilege level, and type (refer to below figure). The Descriptor Privilege 
+ * Level (DPL) included in the segment descriptor indicates the minimum privilege 
+ * required to access the segment, and the privilege level ranges from 0 to 3. 
+ * The smaller the number, the higher the privilege. To access a segment, the 
+ * Current Privilege Level (CPL) of the executing code must be at least as high as 
+ * (i.e., the number must be smaller or equal to) the privilege level set in the descriptor. 
+ * If the condition is not satisfied, the processor raises an exception to indicate 
+ * that a problem has occurred. Similarly, if the accessed address exceeds the size 
+ * of the segment, an exception is also raised. Exceptions are specific events that 
+ * the processor raises to indicate an unexpected problem occurred during code execution.
+ */
+
+/*
+ * Segment Descriptor Structure (figure) (segment_desc)
+ *
+ *  31                 24 23    22    21    20 19      16 15 14    13 12     11   8      7    0
+ * +---------------------+-----+-----+-----+---+--------+--+-------+--------+--------+---------+
+ * |       Base Address  | G   | D/B | L   |AVL|  Limit  |P |  DPL  |   S    | Type   | Base   |
+ * |        [31:24]      |     |     |     |   | [19:16] |  |       |        |        | Address|
+ * +---------------------+-----+-----+-----+---+--------+--+-------+--------+--------+---------+
+ *  31                                      16 15                                         0
+ * +------------------------------------------+---------------------------------------------+
+ * |                 Base Address             |                 Segment Limit               |
+ * |                   [23:16]                |                  [15:00]                    |
+ * +------------------------------------------+---------------------------------------------+
+ */
+
+
 struct segment_desc {
 	unsigned lim_15_0 : 16;
 	unsigned base_15_0 : 16;
