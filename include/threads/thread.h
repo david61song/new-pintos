@@ -31,6 +31,11 @@ typedef int tid_t;
 
 #define MAX_FILEDES_ENTRY 10
 
+typedef struct _filedes_entry{
+	struct file *file_p;
+	bool use;
+}filedes_entry;
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -102,8 +107,7 @@ struct thread {
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	int exit_code;					/* Process exit code.*/
-	struct file* filedes_table[MAX_FILEDES_ENTRY];  /* file descriptor table */
-	int filedes_top;				/* file descriptor top */
+	filedes_entry filedes_table[MAX_FILEDES_ENTRY];  /* file descriptor table */
 	uint64_t *pml4;                     		/* Page map level 4 */
 #endif
 #ifdef VM

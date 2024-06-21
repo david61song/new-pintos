@@ -61,7 +61,7 @@ pass tests/userprog/open-missing
 pass tests/userprog/open-boundary
 pass tests/userprog/open-empty
 pass tests/userprog/open-null
-FAIL tests/userprog/open-bad-ptr
+pass tests/userprog/open-bad-ptr
 pass tests/userprog/open-twice
 pass tests/userprog/close-normal
 pass tests/userprog/close-twice

@@ -11,6 +11,8 @@ void sys_halt(void);
 size_t sys_write(int fildes, const void *buf, size_t nbyte);
 void sys_exit(int);
 int sys_open(const char *);
+int sys_close(int fd);
+int memory_check(void *mem);
 
 
 #endif /* userprog/syscall.h */

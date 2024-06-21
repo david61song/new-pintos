@@ -140,6 +140,15 @@ thread_start (void) {
 	sema_down (&idle_started);
 }
 
+//
+// CPU -> A
+//
+// Ready A B C D
+//
+//
+//
+//
+
 /* find any thread which needs to be woken up.
    This function called every timer interrupts occur. */
 void check_thread_woken_up(struct list* sleep_list) {

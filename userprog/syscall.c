@@ -1,4 +1,5 @@
 #include "userprog/syscall.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <syscall-nr.h>
 #include "include/lib/syscall-nr.h"
@@ -46,6 +47,13 @@ put_user (uint8_t *udst, uint8_t byte) {
     return error_code != -1;
 }
 
+/* Memory check Routine */
+
+int
+memory_check(void *mem){
+	return get_user((const uint8_t *) mem);
+}
+
 /* System call.
  *
  * Previously system call services was handled by the interrupt handler
@@ -62,6 +70,7 @@ put_user (uint8_t *udst, uint8_t byte) {
 
 /* System Call function implementation */
 
+/* exit() System call */
 void
 sys_exit(int status){
 	struct thread *curr = thread_current();
@@ -69,33 +78,22 @@ sys_exit(int status){
 	thread_exit();
 }
 
+/* halt() System call */
 void
 sys_halt(void){
 	power_off();
 }
 
+/* write() System call */
 size_t
 sys_write(int fildes, const void *buf, size_t nbyte){
+
 	if (fildes == 1)
 		printf("%s", (char *)buf);
-	
 	return sizeof(buf);
 }
 
-
-void
-syscall_init (void) {
-	write_msr(MSR_STAR, ((uint64_t)SEL_UCSEG - 0x10) << 48  |
-			((uint64_t)SEL_KCSEG) << 32);
-	write_msr(MSR_LSTAR, (uint64_t) syscall_entry);
-
-	/* The interrupt service rountine should not serve any interrupts
-	 * until the syscall_entry swaps the userland stack to the kernel
-	 * mode stack. Therefore, we masked the FLAG_FL. */
-	write_msr(MSR_SYSCALL_MASK,
-			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
-}
-
+/* open() System call */
 int
 sys_open(const char* path){	
 	struct thread *curr;
@@ -110,7 +108,7 @@ sys_open(const char* path){
 	    return -1;
 	}
 	/* check if path pointer is valid */
-	if (get_user((const uint8_t *)path) == -1){
+	if (memory_check((void *) path) == -1){
 	    sys_exit(-1);
 	}
 	/* We are now safe to deference pointer provided by user process */
@@ -121,12 +119,51 @@ sys_open(const char* path){
 	if (file_p == NULL){
 	    return -1;
 	}
-	curr->filedes_table[curr->filedes_top] = file_p;
-	curr->filedes_top ++;
 
-	return (curr->filedes_top) - 1;
+	for (int i = 3 ; i < MAX_FILEDES_ENTRY ; i ++){
+		if (curr->filedes_table[i].use == false){
+			curr->filedes_table[i].use = true;
+			curr->filedes_table[i].file_p = file_p;
+
+			return i;
+		}
+	}
+
+	return -1;
+
 }
 
+/* close() System call */
+int
+sys_close(int fd){
+    struct thread *curr = thread_current();
+	
+	/* If fd and filedes_entry not matches, return -1 */
+	if (curr->filedes_table[fd].use == false)
+		return -1;
+	
+	curr->filedes_table[fd].use = false;
+	curr->filedes_table[fd].file_p = NULL;
+
+	/* Close success */
+	return 0;
+}
+
+/* End of Implementation of System call */
+
+/* Initialization of System call */
+void
+syscall_init (void) {
+	write_msr(MSR_STAR, ((uint64_t)SEL_UCSEG - 0x10) << 48  |
+			((uint64_t)SEL_KCSEG) << 32);
+	write_msr(MSR_LSTAR, (uint64_t) syscall_entry);
+
+	/* The interrupt service rountine should not serve any interrupts
+	 * until the syscall_entry swaps the userland stack to the kernel
+	 * mode stack. Therefore, we masked the FLAG_FL. */
+	write_msr(MSR_SYSCALL_MASK,
+			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
+}
 
 /* The main system call interface */
 void

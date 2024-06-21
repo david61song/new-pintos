@@ -210,7 +210,7 @@ int
 process_wait (tid_t child_tid UNUSED) {
 
 	 /* auxilary implement*/
-	timer_sleep(300);
+	timer_sleep(100);
 
 	return -1;
 }
@@ -369,8 +369,13 @@ load (const char *file_name, struct intr_frame *if_) {
 	/* change current thread name to appropriate name */
 	change_thread_name(file_name_cpy);
 
-	/* initializtion of file descriptor */
-	t->filedes_top = 3;
+
+	/* Initialization of file descriptor table entry */
+	for (i = 3 ; i < MAX_FILEDES_ENTRY ; i++){
+		t->filedes_table[i].use = false;
+		t->filedes_table[i].file_p = NULL;
+	}
+
 
 	process_activate (thread_current ());
 
