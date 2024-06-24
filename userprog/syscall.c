@@ -19,6 +19,7 @@ void syscall_handler (struct intr_frame *);
  * UADDR must be below KERN_BASE.
  * Returns the byte value if successful, -1 if a segfault
  * occurred. */
+
 static int64_t get_user(const uint8_t *uaddr) {
     int64_t result;
     // Inline assembly to attempt reading a byte from user space memory at address uaddr.
@@ -165,6 +166,7 @@ syscall_init (void) {
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
 }
 
+
 /* The main system call interface */
 void
 syscall_handler (struct intr_frame *f) {
@@ -202,6 +204,7 @@ syscall_handler (struct intr_frame *f) {
 	    case SYS_TELL:
 			break;
 	    case SYS_CLOSE:
+			f->R.rax = sys_close(f->R.rdi);
 			break;
 
 	    default :

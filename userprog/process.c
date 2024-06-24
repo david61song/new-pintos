@@ -171,7 +171,6 @@ process_exec (void *f_name) {
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
 	 * it stores the execution information to the member. */
-
 	/* SEL_UDESG, SEL_UCSEG ...
 	 * GDT selectors defined by loader.
   	 * More selectors are defined by userprog/gdt.h. */
@@ -236,6 +235,8 @@ process_cleanup (void) {
 	/* Destroy the current process's page directory and switch back
 	 * to the kernel-only page directory. */
 	pml4 = curr->pml4;
+
+	/*if pml4 table pointer is already exists (NOT NULL)*/
 	if (pml4 != NULL) {
 		/* Correct ordering here is crucial.  We must set
 		 * cur->pagedir to NULL before switching page directories,
@@ -243,7 +244,8 @@ process_cleanup (void) {
 		 * process page directory.  We must activate the base page
 		 * directory before destroying the process's page
 		 * directory, or our active page directory will be one
-		 * that's been freed (and cleared). */
+		 * that's been freed (and cleared). 
+		 */
 		curr->pml4 = NULL;
 		pml4_activate (NULL);
 		pml4_destroy (pml4);

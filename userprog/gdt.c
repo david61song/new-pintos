@@ -21,28 +21,70 @@
  * exactly what they sound like.  The TSS is used primarily for
  * stack switching on interrupts. */
 
+/*
+ * In 64-bit mode, the Base and Limit values are ignored, 
+ * each descriptor covers the entire linear address space regardless of 
+ * what they are set to.
+ * For more information, see Section 3.4.5: 
+ * Segment Descriptors and Figure 3-8:
+ * Segment Descriptor of the Intel Software Developer Manual, Volume 3-A.
+ */
 
- /*
- * A descriptor is a data structure that stores information about a memory region, 
- * and there are various types of descriptors. Among them, the descriptor that 
- * represents information about a segment is called a segment descriptor. 
- * A segment descriptor includes information such as the segment's start address, 
- * size, privilege level, and type (refer to below figure). The Descriptor Privilege 
- * Level (DPL) included in the segment descriptor indicates the minimum privilege 
- * required to access the segment, and the privilege level ranges from 0 to 3. 
- * The smaller the number, the higher the privilege. To access a segment, the 
- * Current Privilege Level (CPL) of the executing code must be at least as high as 
- * (i.e., the number must be smaller or equal to) the privilege level set in the descriptor. 
- * If the condition is not satisfied, the processor raises an exception to indicate 
- * that a problem has occurred. Similarly, if the accessed address exceeds the size 
- * of the segment, an exception is also raised. Exceptions are specific events that 
- * the processor raises to indicate an unexpected problem occurred during code execution.
+/*
+ * Global Descriptor Table (GDT) initial setup:
+ *
+ * 1. NULL Descriptor (index 0):
+ *    - All fields set to 0
+ *
+ * 2. Kernel Code Segment (SEL_KCSEG, index 1):
+ *    - Type: 0xa (Execute/Read, Code)
+ *    - Base: 0x0
+ *    - Limit: 0xffffffff
+ *    - DPL (Descriptor Privilege Level): 0 (Kernel mode)
+ *
+ * 3. Kernel Data Segment (SEL_KDSEG, index 2):
+ *    - Type: 0x2 (Read/Write, Data)
+ *    - Base: 0x0
+ *    - Limit: 0xffffffff
+ *    - DPL: 0 (Kernel mode)
+ *
+ * 4. User Data Segment (SEL_UDSEG, index 3):
+ *    - Type: 0x2 (Read/Write, Data)
+ *    - Base: 0x0
+ *    - Limit: 0xffffffff
+ *    - DPL: 3 (User mode)
+ *
+ * 5. User Code Segment (SEL_UCSEG, index 4):
+ *    - Type: 0xa (Execute/Read, Code)
+ *    - Base: 0x0
+ *    - Limit: 0xffffffff
+ *    - DPL: 3 (User mode)
+ *
+ * 6. TSS (Task State Segment) Descriptor (SEL_TSS, index 5):
+ *    - Initially all fields set to 0, later filled in gdt_init()
+ *
+ * 7. Two additional empty entries (indices 6 and 7):
+ *    - All fields set to 0
+ *
+ * The SEG64 macro is used to create these entries, which sets up 64-bit segment descriptors.
+ * Notable characteristics:
+ * - All segments have a base of 0 and a limit of 0xffffffff (4GB)
+ * - The 'L' bit is set (value 1), indicating 64-bit mode
+ * - The 'G' bit is set, meaning the limit is scaled by 4KB
+ * - Kernel segments have DPL 0, user segments have DPL 3
+ *
+ * The TSS descriptor is initially empty and is properly set up later in the gdt_init() function,
+ * where it's configured to point to the actual Task State Segment structure.
+ *
+ * This GDT setup provides the basic segmentation model required for the operating system,
+ * distinguishing between kernel and user mode, and providing necessary segments for code and data
+ * in both privilege levels.
  */
 
 /*
  * Segment Descriptor Structure (figure) (segment_desc)
  *
- *  31                 24 23    22    21    20 19      16 15 14    13 12     11   8      7    0
+ *  31                 24 23    22    21    20 19      16 15 14    13 12     11   8      7    0 [+32]
  * +---------------------+-----+-----+-----+---+--------+--+-------+--------+--------+---------+
  * |       Base Address  | G   | D/B | L   |AVL|  Limit  |P |  DPL  |   S    | Type   | Base   |
  * |        [31:24]      |     |     |     |   | [19:16] |  |       |        |        | Address|
@@ -53,6 +95,7 @@
  * |                   [23:16]                |                  [15:00]                    |
  * +------------------------------------------+---------------------------------------------+
  */
+
 
 
 struct segment_desc {
@@ -113,6 +156,8 @@ struct desc_ptr gdt_ds = {
 
 /* Sets up a proper GDT.  The bootstrap loader's GDT didn't
    include user-mode selectors or a TSS, but we need both now. */
+
+
 void
 gdt_init (void) {
 	/* Initialize GDT. */
