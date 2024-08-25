@@ -11,6 +11,7 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 #include "filesys/filesys.h"
+#include "devices/serial.h"
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -88,10 +89,11 @@ sys_halt(void){
 /* write() System call */
 size_t
 sys_write(int fildes, const void *buf, size_t nbyte){
-
 	if (fildes == 1)
-		printf("%s", (char *)buf);
-	return sizeof(buf);
+		for (size_t i = 0 ; i < nbyte ; i ++){
+			serial_putc((*(char *)buf + i));
+		}
+	return nbyte;
 }
 
 /* open() System call */
@@ -125,7 +127,6 @@ sys_open(const char* path){
 		if (curr->filedes_table[i].use == false){
 			curr->filedes_table[i].use = true;
 			curr->filedes_table[i].file_p = file_p;
-
 			return i;
 		}
 	}

@@ -94,16 +94,22 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	void *newpage;
 	/* 1. If the parent_page is kernel page, then return immediately. */
 	if (is_kern_pte(pte)){
-		return false;
+		return true; //go to next page
 	}
 	/* 2. Resolve VA from the parent's page map level 4. */
 	/* &parrent_page == kernel virtual address */
 	parent_page = pml4_get_page (parent->pml4, va);
+	if (parent_page == NULL) {
+        return false;  // If the parent's page is not found, return false.
+    }
 
 	/* 3. Allocate new PAL_USER page for the child and set result to
 	 *    NEWPAGE. */
 	/* &newpage == kernel virtual address */
 	newpage = palloc_get_page(PAL_USER);
+	if (newpage == NULL) {
+        return false;  // If memory allocation fails, return false.
+    }
 
 	/* 4. Duplicate parent's page to the new page and
 	 *    check whether parent's page is writable or not (set WRITABLE
@@ -113,9 +119,10 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	/* 5. Add new page to child's page table at address VA with WRITABLE
 	 *    permission. */
 	/* 6. if fail to insert page, do error handling. */
-	 if (pml4_set_page(current->pml4, va, newpage, true)){
-	 	return false;
-	 }
+	 if (!pml4_set_page(current->pml4, va, newpage, true)) {
+        palloc_free_page(newpage);  // Free the allocated page if insertion fails.
+        return false;
+    }
 
 	return true;
 }
@@ -156,7 +163,10 @@ __do_fork (void *aux) {
 	 * Hint) To duplicate the file object, use `file_duplicate`
 	 * in include/filesys/file.h. Note that parent should not return
 	 * from the fork() until this function successfully duplicates
-	 * the resources of parent.*/
+	 * the resources of parent.
+	 */
+	
+	
 
 	process_init ();
 
