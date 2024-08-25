@@ -92,25 +92,31 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	struct thread *parent = (struct thread *) aux;
 	void *parent_page;
 	void *newpage;
-	bool writable;
-
-	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
-
+	/* 1. If the parent_page is kernel page, then return immediately. */
+	if (is_kern_pte(pte)){
+		return false;
+	}
 	/* 2. Resolve VA from the parent's page map level 4. */
+	/* &parrent_page == kernel virtual address */
 	parent_page = pml4_get_page (parent->pml4, va);
 
-	/* 3. TODO: Allocate new PAL_USER page for the child and set result to
-	 *    TODO: NEWPAGE. */
+	/* 3. Allocate new PAL_USER page for the child and set result to
+	 *    NEWPAGE. */
+	/* &newpage == kernel virtual address */
+	newpage = palloc_get_page(PAL_USER);
 
-	/* 4. TODO: Duplicate parent's page to the new page and
-	 *    TODO: check whether parent's page is writable or not (set WRITABLE
-	 *    TODO: according to the result). */
+	/* 4. Duplicate parent's page to the new page and
+	 *    check whether parent's page is writable or not (set WRITABLE
+	 *    according to the result). */
+	 memcpy(newpage, parent_page, PGSIZE);
 
 	/* 5. Add new page to child's page table at address VA with WRITABLE
 	 *    permission. */
-	if (!pml4_set_page (current->pml4, va, newpage, writable)) {
-		/* 6. TODO: if fail to insert page, do error handling. */
-	}
+	/* 6. if fail to insert page, do error handling. */
+	 if (pml4_set_page(current->pml4, va, newpage, true)){
+	 	return false;
+	 }
+
 	return true;
 }
 #endif
@@ -124,8 +130,8 @@ __do_fork (void *aux) {
 	struct intr_frame if_;
 	struct thread *parent = (struct thread *) aux;
 	struct thread *current = thread_current ();
-	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
-	struct intr_frame *parent_if;
+	/* somehow pass the parent_if. (i.e. process_fork()'s if_) */
+	struct intr_frame *parent_if = &(parent->tf);
 	bool succ = true;
 
 	/* 1. Read the cpu context to local stack. */
@@ -146,11 +152,11 @@ __do_fork (void *aux) {
 		goto error;
 #endif
 
-	/* TODO: Your code goes here.
-	 * TODO: Hint) To duplicate the file object, use `file_duplicate`
-	 * TODO:       in include/filesys/file.h. Note that parent should not return
-	 * TODO:       from the fork() until this function successfully duplicates
-	 * TODO:       the resources of parent.*/
+	/* Your code goes here.
+	 * Hint) To duplicate the file object, use `file_duplicate`
+	 * in include/filesys/file.h. Note that parent should not return
+	 * from the fork() until this function successfully duplicates
+	 * the resources of parent.*/
 
 	process_init ();
 
