@@ -90,9 +90,7 @@ sys_halt(void){
 size_t
 sys_write(int fildes, const void *buf, size_t nbyte){
 	if (fildes == 1)
-		for (size_t i = 0 ; i < nbyte ; i ++){
-			serial_putc((*(char *)buf + i));
-		}
+		printf("%s", (char *) buf);
 	return nbyte;
 }
 
