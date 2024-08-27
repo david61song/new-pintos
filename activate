@@ -14,4 +14,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 PATH=$DIR/utils:$PATH
 #It also adds some cross compilers binary to $PATH
-PATH=/usr/local/gcc-7/bin/:$PATH
+PATH=/usr/cross/bin/:$PATH
